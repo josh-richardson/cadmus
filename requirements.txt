@@ -1,0 +1,10 @@
+altgraph==0.17
+fbs==0.8.6
+future==0.18.2
+macholib==1.14
+pefile==2019.4.18
+pulsectl==20.5.1
+PyInstaller==3.4
+PyQt5==5.9.2
+PyQt5-stubs==5.14.2.2
+sip==4.19.8
