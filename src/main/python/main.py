@@ -13,12 +13,14 @@ pulse = pulsectl.Pulse('t')
 
 class AudioMenuItem(QAction):
 
-    def __init__(self, text, parent, disable_menu, mic_name):
+    def __init__(self, text, parent, disable_menu, mic_name, context):
         super().__init__(text, parent)
         self.mic_name = mic_name
         self.disable_menu = disable_menu
+        self.context = context
         self.setStatusTip('Use the %s as an input for noise suppression' % text)
-        self.triggered.connect(lambda: enable_noise_suppression(self))
+        self.triggered.connect(lambda: enable_noise_suppression(self, self.context))
+
 
 
 def cli_command(command):
@@ -26,13 +28,14 @@ def cli_command(command):
         s.write(command)
 
 
-def load_modules(mic_name):
+def load_modules(mic_name, context):
     cadmus_cache_path = os.path.join(os.environ['HOME'], '.cache', 'cadmus')
     if not os.path.exists(cadmus_cache_path):
         os.makedirs(cadmus_cache_path)
 
-    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")
-    copyfile(os.path.abspath("librnnoise_ladspa.so"), cadmus_lib_path)
+    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")    
+
+    copyfile(context.get_resource('librnnoise_ladspa.so'), cadmus_lib_path)
 
     pulse.module_load('module-null-sink', 'sink_name=%s' % 'mic_denoised_out')
     pulse.module_load('module-ladspa-sink',
@@ -52,8 +55,8 @@ def unload_modules():
     cli_command("unload-module module-ladspa-sink")
 
 
-def enable_noise_suppression(audio_menu):
-    load_modules(audio_menu.mic_name)
+def enable_noise_suppression(audio_menu, context):
+    load_modules(audio_menu.mic_name, context)
     audio_menu.parent().setEnabled(False)
     audio_menu.disable_menu.setEnabled(True)
 
@@ -66,7 +69,6 @@ def disable_noise_suppression(disable_menu, enable_menu):
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()
-
     ico_file = appctxt.get_resource('icon.png')
     icon = QIcon(ico_file)
 
@@ -81,7 +83,7 @@ if __name__ == '__main__':
     enable_suppression_menu = QMenu("Enable Noise Suppression")
     for src in pulse.source_list():
         enable_suppression_menu.addAction(
-            AudioMenuItem(src.description, enable_suppression_menu, disable_suppression_menu, src.name))
+            AudioMenuItem(src.description, enable_suppression_menu, disable_suppression_menu, src.name, appctxt))
 
     disable_suppression_menu.triggered.connect(
         lambda: disable_noise_suppression(disable_suppression_menu, enable_suppression_menu))
