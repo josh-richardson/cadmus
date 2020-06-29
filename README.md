@@ -9,9 +9,9 @@ Cadmus is a graphical application which allows you to remove background noise fr
 </p>
 
 ### About & Usage
-Whilst software exists on Windows & MacOS (Krisp, RTX Voice, etc) to remove background noise from recorded audio in real-time, no user-friendly solution seemed to exist on Linux. Cadmus was written to address this shortcoming, allowing users to remove background noise from audio in Discord/Zoom/Skype/Slack/etc calls without having to use the commandline. It is primarily a GUI frontend for @werman's [PulseAudio Noise Supression Plugin](https://github.com/werman/noise-suppression-for-voice).
+Whilst software exists on Windows & MacOS (Krisp, RTX Voice, etc) to remove background noise from recorded audio in real-time, no user-friendly solution seemed to exist on Linux. Cadmus was written to address this shortcoming, allowing users to remove background noise from audio in Discord/Zoom/Skype/Slack/etc calls without having to use the commandline. It is primarily a GUI frontend for @werman's [PulseAudio Noise Suppression Plugin](https://github.com/werman/noise-suppression-for-voice).
 
-When you run Cadmus, you'll see a new notification icon showing a microphone in your chosen shell. On click, you'll be able to select the microphone whose noise you wish to supress. Cadmus will then set the default PulseAudio microphone to use the virtual denoised output of the chosen microphone. Note that if you're currently recording audio, you'll have to stop recording and start again in order for changes to occur - streams which are currently being recorded will not be hot-swapped to the new input.      
+When you run Cadmus, you'll see a new notification icon showing a microphone in your chosen shell. On click, you'll be able to select the microphone whose noise you wish to suppress. Cadmus will then set the default PulseAudio microphone to use the virtual denoised output of the chosen microphone. Note that if you're currently recording audio, you'll have to stop recording and start again in order for changes to occur - streams which are currently being recorded will not be hot-swapped to the new input.      
 
 ### Installation
 
@@ -27,9 +27,14 @@ When you run Cadmus, you'll see a new notification icon showing a microphone in 
 - Download the latest `cadmus.zip` file on the [releases page](https://github.com/josh-richardson/cadmus/releases/)
 - Once downloaded, run `unzip cadmus.zip && cd cadmus && ./cadmus` in a terminal
  
+ 
+### Troubleshooting
+If Cadmus doesn't seem to work for you in an application, take a look at [this thread](https://github.com/josh-richardson/cadmus/issues/2) to see if you're encountering the same issue. This section will be expanded to reflect more detailed troubleshooting steps after release 0.0.2.
+ 
 
 ### Status
 Cadmus has been tested on Arch Linux, Debian 10 and Ubuntu 20.04. It should work with all flavors of Linux with PulseAudio installed - but if you find a bug, please do report it on the GitHub issue tracker. It's still relatively early in development & hasn't been tested extensively.
+
 
 ### Development
 To get the project up and running, first clone the repository. Next create a virtualenv, and run `pip install -r requirements.txt`. Cadmus is written in Python making use of PyQt5 and the Fman Build System. You can invoke `fbs run` to run Cadmus from source.
