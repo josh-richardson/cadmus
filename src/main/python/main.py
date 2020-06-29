@@ -3,6 +3,7 @@ import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from shutil import copyfile
 import contextlib
 import os
 import pulsectl
@@ -26,11 +27,16 @@ def cli_command(command):
 
 
 def load_modules(mic_name):
-    print(mic_name)
+    cadmus_cache_path = os.path.join(os.environ['HOME'], '.cache', 'cadmus')
+    if not os.path.exists(cadmus_cache_path):
+        os.makedirs(cadmus_cache_path)
+
+    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")
+    copyfile(os.path.abspath("librnnoise_ladspa.so"), cadmus_lib_path)
+
     pulse.module_load('module-null-sink', 'sink_name=%s' % 'mic_denoised_out')
     pulse.module_load('module-ladspa-sink',
-                      'sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s' % os.path.abspath(
-                          "librnnoise_ladspa.so"))
+                      'sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s' % cadmus_lib_path)
 
     pulse.module_load('module-loopback',
                       'latency_msec=1 source=%s sink=mic_raw_in channels=1' % mic_name)
