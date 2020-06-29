@@ -2,7 +2,7 @@
     "app_name": "cadmus",
     "author": "Joshua Richardson",
     "main_module": "src/main/python/main.py",
-    "version": "0.0.0",
+    "version": "1.0",
     "gpg_key": "517DA3400EED7D65F736EA33FF4A765C2EF47477",
     "gpg_name": "Joshua Richardson"
 }

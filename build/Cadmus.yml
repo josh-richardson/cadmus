@@ -1,0 +1,8 @@
+app: Cadmus
+
+ingredients:
+  script:
+    - wget -c https://github.com/josh-richardson/cadmus/releases/download/0.0.1/cadmus.deb
+
+script:
+  - cp -r opt/cadmus/* ./usr/bin

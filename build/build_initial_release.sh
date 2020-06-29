@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# This is intended to be executed inside an fbs-created Ubuntu VM
+# run `fbs buildvm ubuntu` and `fbs runvm ubuntu`, then invoke this script
+
 pip install -r requirements.txt
 tar -xvf zlib-1.2.9.tar.gz
 cd zlib-1.2.9
@@ -11,3 +14,4 @@ rm -rf zlib-1.2.9
 
 fbs freeze
 cp src/main/python/librnnoise_ladspa.so target/cadmus
+fbs installer
