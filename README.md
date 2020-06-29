@@ -16,15 +16,15 @@ When you run Cadmus, you'll see a new notification icon showing a microphone in 
 ### Installation
 
 #### For Debian-based distributions:
-- Download the latest `cadmus.deb` file on the [releases page]()
+- Download the latest `cadmus.deb` file on the [releases page](https://github.com/josh-richardson/cadmus/releases/)
 - Once downloaded, open the file in your chosen file explorer to install it, or run `sudo dpkg -i cadmus.deb` in a terminal
 
 #### For non-Debian distributions:
-- Download the latest `cadmus.AppImage` file on the [releases page]()
+- Download the latest `cadmus.AppImage` file on the [releases page](https://github.com/josh-richardson/cadmus/releases/)
 - Once downloaded, open the file in your chosen file explorer to run it (requires AppImage Launcher), or run `chmod +x cadmus.AppImage && ./cadmus.AppImage` in a terminal
 
 #### To run from an archive:
-- Download the latest `cadmus.zip` file on the [releases page]()
+- Download the latest `cadmus.zip` file on the [releases page](https://github.com/josh-richardson/cadmus/releases/)
 - Once downloaded, run `unzip cadmus.zip && cd cadmus && ./cadmus` in a terminal
  
 
