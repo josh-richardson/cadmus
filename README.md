@@ -44,3 +44,7 @@ To get the project up and running, first clone the repository. Next create a vir
 - [ ] Gracefully start up & shut down, removing loaded modules on exit
 - [ ] Run on startup & use a default microphone?
 - [ ] Deploy on AUR
+
+
+#### Donate
+Various people have asked me how they can donate to this project. As a consequence, I've created a [Patreon](https://www.patreon.com/josh_richardson)
