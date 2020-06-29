@@ -12,6 +12,7 @@ ln -s -f /usr/local/lib/libz.so.1.2.9/lib libz.so.1
 cd ~/cadmus
 rm -rf zlib-1.2.9
 
+cd ..
 fbs freeze
 cp src/main/python/librnnoise_ladspa.so target/cadmus
 fbs installer
