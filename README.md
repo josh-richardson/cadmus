@@ -13,7 +13,7 @@ Whilst software exists on Windows & MacOS (Krisp, RTX Voice, etc) to remove back
 
 When you run Cadmus, you'll see a new notification icon showing a microphone in your chosen shell. On click, you'll be able to select the microphone whose noise you wish to suppress. Cadmus will then set the default PulseAudio microphone to use the virtual denoised output of the chosen microphone. Note that if you're currently recording audio, you'll have to stop recording and start again in order for changes to occur - streams which are currently being recorded will not be hot-swapped to the new input.      
 
-### Installation
+### Installation from pre-built releases (currently only for x86_64 Linux)
 
 #### For Debian-based distributions:
 - Download the latest `cadmus.deb` file on the [releases page](https://github.com/josh-richardson/cadmus/releases/)
@@ -29,8 +29,13 @@ When you run Cadmus, you'll see a new notification icon showing a microphone in 
  
  
 ### Troubleshooting
-If Cadmus doesn't seem to work for you in an application, take a look at [this thread](https://github.com/josh-richardson/cadmus/issues/2) to see if you're encountering the same issue. This section will be expanded to reflect more detailed troubleshooting steps after release 0.0.2.
- 
+##### The Tray Icon Does Not Appear
+If you're using GNOME, you may need to use an extension such as [TopIcons Plus Git](https://extensions.gnome.org/extension/2311/topicons-plus/) to view the Tray Icon. See this issue [7](https://github.com/josh-richardson/cadmus/issues/7).
+##### Do I Need To Install The PulseAudio Noise Suppression Plugin?
+For now, if you are using the pre-built releases, the plugin is included, so you don't need to install it. See this issue [2](https://github.com/josh-richardson/cadmus/issues/2).
+##### Output Is Still Noisy
+See these issues: [10](https://github.com/josh-richardson/cadmus/issues/10), [11](https://github.com/josh-richardson/cadmus/issues/11).
+
 
 ### Status
 Cadmus has been tested on Arch Linux, Debian 10 and Ubuntu 20.04. It should work with all flavors of Linux with PulseAudio installed - but if you find a bug, please do report it on the GitHub issue tracker. It's still relatively early in development & hasn't been tested extensively.
