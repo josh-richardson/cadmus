@@ -13,14 +13,33 @@ pulse = pulsectl.Pulse('t')
 
 class AudioMenuItem(QAction):
 
-    def __init__(self, text, parent, disable_menu, mic_name, context):
+    def __init__(self, text, parent, disable_menu, mic_name, context, icon_manager):
         super().__init__(text, parent)
         self.mic_name = mic_name
         self.disable_menu = disable_menu
         self.context = context
         self.setStatusTip('Use the %s as an input for noise suppression' % text)
-        self.triggered.connect(lambda: enable_noise_suppression(self, self.context))
+        self.icon_manager = icon_manager
+        self.triggered.connect(lambda: (
+            enable_noise_suppression(self, self.context),
+            self.icon_manager.set_enabled_icon()
+        ))
 
+
+class IconManager:
+
+    def __init__(self, disalbed_icon, enabled_icon, tray):
+        self.disalbed_icon = disalbed_icon
+        self.enabled_icon = enabled_icon
+        self.tray = tray
+        self.set_disabled_icon()
+        self.tray.setVisible(True)
+
+    def set_enabled_icon(self):
+        self.tray.setIcon(enabled_icon)
+
+    def set_disabled_icon(self):
+        self.tray.setIcon(disabled_icon)
 
 
 def cli_command(command):
@@ -33,7 +52,7 @@ def load_modules(mic_name, context):
     if not os.path.exists(cadmus_cache_path):
         os.makedirs(cadmus_cache_path)
 
-    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")    
+    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")
 
     copyfile(context.get_resource('librnnoise_ladspa.so'), cadmus_lib_path)
 
@@ -69,12 +88,13 @@ def disable_noise_suppression(disable_menu, enable_menu):
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()
-    ico_file = appctxt.get_resource('icon.png')
-    icon = QIcon(ico_file)
 
+    enabled_ico_file = appctxt.get_resource('icon_enabled.png')
+    enabled_icon = QIcon(enabled_ico_file)
+    disabled_ico_file = appctxt.get_resource('icon_disabled.png')
+    disabled_icon = QIcon(disabled_ico_file)
     tray = QSystemTrayIcon()
-    tray.setIcon(icon)
-    tray.setVisible(True)
+    icon_manager = IconManager(enabled_icon, disabled_icon, tray)
 
     main_menu = QMenu()
     disable_suppression_menu = QAction("Disable Noise Suppression")
@@ -83,10 +103,12 @@ if __name__ == '__main__':
     enable_suppression_menu = QMenu("Enable Noise Suppression")
     for src in pulse.source_list():
         enable_suppression_menu.addAction(
-            AudioMenuItem(src.description, enable_suppression_menu, disable_suppression_menu, src.name, appctxt))
+            AudioMenuItem(src.description, enable_suppression_menu, disable_suppression_menu, src.name, appctxt, icon_manager))
 
-    disable_suppression_menu.triggered.connect(
-        lambda: disable_noise_suppression(disable_suppression_menu, enable_suppression_menu))
+    disable_suppression_menu.triggered.connect(lambda: (
+        disable_noise_suppression(disable_suppression_menu, enable_suppression_menu),
+        icon_manager.set_disabled_icon()
+    ))
 
     main_menu.addMenu(enable_suppression_menu)
     main_menu.addAction(disable_suppression_menu)
