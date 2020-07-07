@@ -28,8 +28,8 @@ class AudioMenuItem(QAction):
 
 class IconManager:
 
-    def __init__(self, disalbed_icon, enabled_icon, tray):
-        self.disalbed_icon = disalbed_icon
+    def __init__(self, disabled_icon, enabled_icon, tray):
+        self.disabled_icon = disabled_icon
         self.enabled_icon = enabled_icon
         self.tray = tray
         self.set_disabled_icon()
