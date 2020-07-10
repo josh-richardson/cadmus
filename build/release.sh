@@ -5,20 +5,26 @@ then
 	echo "Remove target/ubuntu directory before running, it's probably owned by root due to docker"
 	exit 1
 fi
-
+git clone https://github.com/werman/noise-suppression-for-voice.git
+cd noise-suppression-for-voice
+cmake -Bbuild-x64 -H. -DCMAKE_BUILD_TYPE=Release
+cd build-x64
+make
+\cp bin/ladspa/librnnoise_ladspa.so ../../src/main/resources/base/librnnoise_ladspa.so
+cd ../../
+rm -rf noise-suppression-for-voice
 
 mkdir releases/$1
 
-# build ubuntu
+# build FBS VM
 fbs buildvm ubuntu
 
-# build docker run command identical to fbs, but sneakily inject our own bashrc
+# build docker run command identical to fbs, but inject our own bashrc
 docker_run="docker run -it"
 for i in `ls -A | grep -v target` ; do
  docker_run="$docker_run -v `readlink -f $i`:/root/cadmus/$i"
 done
 docker_run="$docker_run -v `readlink -f ./target/ubuntu`:/root/cadmus/target -v `readlink -f ./build/.bashrc`:/root/.bashrc cadmus/ubuntu "
-echo $docker_run
 eval $docker_run
 
 # copy artifacts to released directory
