@@ -105,7 +105,7 @@ class CadmusApplication(QSystemTrayIcon):
             self.enable_suppression_menu.addAction(mic_menu_item)
             mic_menu_item.triggered.connect(self.enable_noise_suppression)
 
-        self.exit_menu.triggered.connect(self.app_context.app.quit)
+        self.exit_menu.triggered.connect(self.quit)
 
         main_menu.addMenu(self.enable_suppression_menu)
         main_menu.addAction(self.disable_suppression_menu)
@@ -125,6 +125,10 @@ class CadmusApplication(QSystemTrayIcon):
         self.setIcon(self.enabled_icon)
         self.enable_suppression_menu.setEnabled(False)
         self.disable_suppression_menu.setEnabled(True)
+
+    def quit(self):
+        self.disable_noise_suppression()
+        self.app_context.app.quit()
 
 
 if __name__ == "__main__":
