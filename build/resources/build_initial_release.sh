@@ -9,7 +9,7 @@ sudo -s
 cd /lib/x86_64-linux-gnu
 ln -s -f /usr/local/lib/libz.so.1.2.9/lib libz.so.1
 cd ~/cadmus
-rm -rf build/zlib-1.2.9
+rm -rf build/resources/zlib-1.2.9
 
 pip install -r requirements.txt
 fbs freeze

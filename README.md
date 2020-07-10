@@ -42,7 +42,11 @@ Cadmus has been tested on Arch Linux, Debian 10 and Ubuntu 20.04. It should work
 
 
 ### Development
-To get the project up and running, first clone the repository. Next create a virtualenv, and run `pip install -r requirements.txt`. Cadmus is written in Python making use of PyQt5 and the Fman Build System. You can invoke `fbs run` to run Cadmus from source.
+Cadmus is written in Python 3.6, making use of PyQt5 and the Fman Build System (fbs). To get the project up and running, first clone the repository. Next create a virtualenv using Python 3.6 (fbs doesn't support any higher), and run `pip install -r requirements.txt`. 
+
+Next, clone the [noise suppression for voice repository](https://github.com/werman/noise-suppression-for-voice), and build it (see the readme in the repo for more details). Locate the output file `librnnoise_ladspa.so` and move it to `src/main/resources/base`. Alternatively you can download the zip archive & locate the relevant file from the resources section of the repository, if you don't want to build from source.
+
+Having done this, you can invoke `fbs run` in the Cadmus project root directory to run Cadmus from source.
 
 ### Roadmap
 - [ ] Add some tests
