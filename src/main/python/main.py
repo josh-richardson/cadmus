@@ -16,7 +16,7 @@ def cli_command(command):
         command = [command]
     with contextlib.closing(pulsectl.connect_to_cli()) as s:
         for c in command:
-            s.write(c)
+            s.write(c + "\n")
 
 
 def load_modules(mic_name, context):
@@ -41,7 +41,11 @@ def load_modules(mic_name, context):
     )
 
     cli_command(
-        'update-source-proplist mic_denoised_out.monitor device.description="Denoised Microphone"'
+        [
+            'update-source-proplist mic_denoised_out.monitor device.description="Cadmus_Denoised_Microphone_Output"',
+            'update-sink-proplist mic_raw_in device.description="Cadmus_Raw_Microphone_Redirect"',
+            'update-sink-proplist mic_denoised_out device.description="Cadmus_Microphone_Sink"',
+        ]
     )
 
     pulse.source_default_set("mic_denoised_out.monitor")
