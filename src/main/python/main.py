@@ -11,54 +11,52 @@ import pulsectl
 pulse = pulsectl.Pulse("t")
 
 
-def cli_command(command):
-    if not isinstance(command, list):
-        command = [command]
-    with contextlib.closing(pulsectl.connect_to_cli()) as s:
-        for c in command:
-            s.write(c + "\n")
+class CadmusPulseInterface:
+    @staticmethod
+    def cli_command(command):
+        if not isinstance(command, list):
+            command = [command]
+        with contextlib.closing(pulsectl.connect_to_cli()) as s:
+            for c in command:
+                s.write(c + "\n")
 
+    @staticmethod
+    def load_modules(mic_name, cadmus_lib_path):
+        pulse.module_load(
+            "module-null-sink",
+            "sink_name=mic_denoised_out "
+            "sink_properties=\"device.description='Cadmus Microphone Sink'\"",
+        )
+        pulse.module_load(
+            "module-ladspa-sink",
+            "sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s "
+            "sink_properties=\"device.description='Cadmus Raw Microphone Redirect'\""
+            % cadmus_lib_path,
+        )
 
-def load_modules(mic_name, context):
-    cadmus_cache_path = os.path.join(os.environ["HOME"], ".cache", "cadmus")
-    if not os.path.exists(cadmus_cache_path):
-        os.makedirs(cadmus_cache_path)
+        pulse.module_load(
+            "module-loopback",
+            "latency_msec=1 source=%s sink=mic_raw_in channels=1 "
+            "source_output_properties=\"device.description='Cadmus Denoised Virtual Output'\""
+            % mic_name,
+        )
 
-    cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")
+        pulse.module_load(
+            "module-remap-source",
+            "master=mic_denoised_out.monitor source_name=mic_remap "
+            "source_properties=\"device.description='Cadmus Denoised Output'\"",
+        )
 
-    copyfile(context.get_resource("librnnoise_ladspa.so"), cadmus_lib_path)
-
-    pulse.module_load("module-null-sink", "sink_name=%s" % "mic_denoised_out")
-    pulse.module_load(
-        "module-ladspa-sink",
-        "sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s"
-        % cadmus_lib_path,
-    )
-
-    pulse.module_load(
-        "module-loopback",
-        "latency_msec=1 source=%s sink=mic_raw_in channels=1" % mic_name,
-    )
-
-    cli_command(
-        [
-            'update-source-proplist mic_denoised_out.monitor device.description="Cadmus_Denoised_Microphone_Output"',
-            'update-sink-proplist mic_raw_in device.description="Cadmus_Raw_Microphone_Redirect"',
-            'update-sink-proplist mic_denoised_out device.description="Cadmus_Microphone_Sink"',
-        ]
-    )
-
-    pulse.source_default_set("mic_denoised_out.monitor")
-
-
-def unload_modules():
-    cli_command(
-        [
-            "unload-module module-loopback",
-            "unload-module module-null-sink",
-            "unload-module module-ladspa-sink",
-        ]
-    )
+    @staticmethod
+    def unload_modules():
+        CadmusPulseInterface.cli_command(
+            [
+                "unload-module module-loopback",
+                "unload-module module-null-sink",
+                "unload-module module-ladspa-sink",
+                "unload-module module-remap-source",
+            ]
+        )
 
 
 class AudioMenuItem(QAction):
@@ -74,12 +72,25 @@ class CadmusApplication(QSystemTrayIcon):
         self.app_context = app_context
         self.enabled_icon = QIcon(app_context.get_resource("icon_enabled.png"))
         self.disabled_icon = QIcon(app_context.get_resource("icon_disabled.png"))
+        self.cadmus_lib_path = ""
 
         self.disable_suppression_menu = QAction("Disable Noise Suppression")
         self.enable_suppression_menu = QMenu("Enable Noise Suppression")
         self.exit_menu = QAction("Exit")
 
         self.gui_setup()
+        self.drop_cadmus_binary()
+
+    def drop_cadmus_binary(self):
+        cadmus_cache_path = os.path.join(os.environ["HOME"], ".cache", "cadmus")
+        if not os.path.exists(cadmus_cache_path):
+            os.makedirs(cadmus_cache_path)
+
+        self.cadmus_lib_path = os.path.join(cadmus_cache_path, "librnnoise_ladspa.so")
+
+        copyfile(
+            self.app_context.get_resource("librnnoise_ladspa.so"), self.cadmus_lib_path
+        )
 
     def gui_setup(self):
         main_menu = QMenu()
@@ -104,13 +115,14 @@ class CadmusApplication(QSystemTrayIcon):
         self.setContextMenu(main_menu)
 
     def disable_noise_suppression(self):
-        unload_modules()
+        CadmusPulseInterface.unload_modules()
         self.disable_suppression_menu.setEnabled(False)
         self.enable_suppression_menu.setEnabled(True)
         self.setIcon(self.disabled_icon)
 
     def enable_noise_suppression(self):
-        load_modules(self.sender().mic_name, self.app_context)
+        CadmusPulseInterface.load_modules(self.sender().mic_name, self.cadmus_lib_path)
+        self.setIcon(self.enabled_icon)
         self.enable_suppression_menu.setEnabled(False)
         self.disable_suppression_menu.setEnabled(True)
 
