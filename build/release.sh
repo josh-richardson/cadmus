@@ -45,4 +45,4 @@ cd ..
 rm -rf pkg2appimage
 echo "Release artifacts are in: ../releases/$1"
 
-# todo: create GitHub release & upload artifats
+# todo: create GitHub release & upload artifacts

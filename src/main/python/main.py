@@ -22,6 +22,9 @@ class CadmusPulseInterface:
 
     @staticmethod
     def load_modules(mic_name, cadmus_lib_path):
+        print(mic_name)
+        print(cadmus_lib_path)
+
         pulse.module_load(
             "module-null-sink",
             "sink_name=mic_denoised_out "
@@ -36,9 +39,7 @@ class CadmusPulseInterface:
 
         pulse.module_load(
             "module-loopback",
-            "latency_msec=1 source=%s sink=mic_raw_in channels=1 "
-            "source_output_properties=\"device.description='Cadmus Denoised Virtual Output'\""
-            % mic_name,
+            "latency_msec=1 source=%s sink=mic_raw_in channels=1" % mic_name,
         )
 
         pulse.module_load(
