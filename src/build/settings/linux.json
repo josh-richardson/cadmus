@@ -1,6 +1,7 @@
 {
     "categories": "Utility;",
-    "description": "",
-    "author_email": "",
-    "url": ""
+    "description": "A GUI frontend for @werman's Pulse Audio real-time noise suppression plugin ",
+    "author_email": "joshua@richardson.tech",
+    "url": "https://github.com/josh-richardson/cadmus/",
+    "license": "GPLv3"
 }
