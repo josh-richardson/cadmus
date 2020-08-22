@@ -1,7 +1,8 @@
 import sys
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QWidget
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QWidget, QWidgetAction, QSlider
+from PyQt5.QtCore import Qt
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from shutil import copyfile
 import contextlib
@@ -32,9 +33,9 @@ class CadmusPulseInterface:
         )
         pulse.module_load(
             "module-ladspa-sink",
-            "sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s "
+            "sink_name=mic_raw_in sink_master=mic_denoised_out label=noise_suppressor_mono plugin=%s control=%d "
             "sink_properties=\"device.description='Cadmus Raw Microphone Redirect'\""
-            % cadmus_lib_path,
+            % (cadmus_lib_path, CadmusApplication.control_level),
         )
 
         pulse.module_load(
@@ -44,9 +45,11 @@ class CadmusPulseInterface:
 
         pulse.module_load(
             "module-remap-source",
-            "master=mic_denoised_out.monitor source_name=mic_remap "
-            "source_properties=\"device.description='Cadmus Denoised Output'\"",
+            "master=mic_denoised_out.monitor source_name=denoised "
+            "source_properties=\"device.description='Cadmus Denoised Microphone (Use me!)'\"",
         )
+
+        print("Set suppression level to %d" % CadmusApplication.control_level)
 
     @staticmethod
     def unload_modules():
@@ -68,6 +71,8 @@ class AudioMenuItem(QAction):
 
 
 class CadmusApplication(QSystemTrayIcon):
+    control_level = 50
+
     def __init__(self, app_context, parent=None):
         QSystemTrayIcon.__init__(self, parent)
         self.app_context = app_context
@@ -77,10 +82,24 @@ class CadmusApplication(QSystemTrayIcon):
 
         self.disable_suppression_menu = QAction("Disable Noise Suppression")
         self.enable_suppression_menu = QMenu("Enable Noise Suppression")
+        self.level_section = None
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setTickInterval(5)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(100)
+        self.slider.setValue(CadmusApplication.control_level)
+        self.slider.valueChanged.connect(self.slider_valuechange)
         self.exit_menu = QAction("Exit")
 
         self.gui_setup()
         self.drop_cadmus_binary()
+
+    def get_section_message(self):
+        return "Suppression Level: %d" % self.slider.value()
+
+    def slider_valuechange(self):
+        CadmusApplication.control_level = self.slider.value()
+        self.level_section.setText(self.get_section_message())
 
     def drop_cadmus_binary(self):
         cadmus_cache_path = os.path.join(os.environ["HOME"], ".cache", "cadmus")
@@ -111,6 +130,12 @@ class CadmusApplication(QSystemTrayIcon):
         main_menu.addMenu(self.enable_suppression_menu)
         main_menu.addAction(self.disable_suppression_menu)
         main_menu.addAction(self.exit_menu)
+
+        # Add slider widget
+        self.level_section = self.enable_suppression_menu.addSection(self.get_section_message())
+        wa = QWidgetAction(self.enable_suppression_menu)
+        wa.setDefaultWidget(self.slider)
+        self.enable_suppression_menu.addAction(wa)
 
         self.setIcon(self.disabled_icon)
         self.setContextMenu(main_menu)
