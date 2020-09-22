@@ -1,27 +1,43 @@
 import sys
-
+import contextlib
+import os
+from shutil import copyfile
+import pulsectl
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QWidget
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from shutil import copyfile
-import contextlib
-import os
-import pulsectl
 
 pulse = pulsectl.Pulse("t")
 
 
 class CadmusPulseInterface:
     @staticmethod
-    def cli_command(command):
-        if not isinstance(command, list):
-            command = [command]
+    def cli_command(commands):
+        """FIXME! briefly describe function
+
+        :param command:
+        :returns:
+        :rtype:
+
+        """
+
+        if not isinstance(commands, list):
+            commands = [commands]
         with contextlib.closing(pulsectl.connect_to_cli()) as s:
-            for c in command:
-                s.write(c + "\n")
+            for command in commands:
+                s.write(command + "\n")
 
     @staticmethod
     def load_modules(mic_name, cadmus_lib_path):
+        """FIXME! briefly describe function
+
+        :param mic_name:
+        :param cadmus_lib_path:
+        :returns:
+        :rtype:
+
+        """
+
         print(mic_name)
         print(cadmus_lib_path)
 
@@ -50,7 +66,13 @@ class CadmusPulseInterface:
 
     @staticmethod
     def unload_modules():
-        CadmusPulseInterface.cli_command(
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+         CadmusPulseInterface.cli_command(
             [
                 "unload-module module-loopback",
                 "unload-module module-null-sink",
@@ -62,6 +84,16 @@ class CadmusPulseInterface:
 
 class AudioMenuItem(QAction):
     def __init__(self, text, parent, mic_name):
+        """FIXME! briefly describe function
+
+        :param text:
+        :param parent:
+        :param mic_name:
+        :returns:
+        :rtype:
+
+        """
+
         super().__init__(text, parent)
         self.mic_name = mic_name
         self.setStatusTip("Use the %s as an input for noise suppression" % text)
@@ -69,6 +101,15 @@ class AudioMenuItem(QAction):
 
 class CadmusApplication(QSystemTrayIcon):
     def __init__(self, app_context, parent=None):
+        """FIXME! briefly describe function
+
+        :param app_context:
+        :param parent:
+        :returns:
+        :rtype:
+
+        """
+
         QSystemTrayIcon.__init__(self, parent)
         self.app_context = app_context
         self.enabled_icon = QIcon(app_context.get_resource("icon_enabled.png"))
@@ -83,6 +124,13 @@ class CadmusApplication(QSystemTrayIcon):
         self.drop_cadmus_binary()
 
     def drop_cadmus_binary(self):
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+
         cadmus_cache_path = os.path.join(os.environ["HOME"], ".cache", "cadmus")
         if not os.path.exists(cadmus_cache_path):
             os.makedirs(cadmus_cache_path)
@@ -94,6 +142,13 @@ class CadmusApplication(QSystemTrayIcon):
         )
 
     def gui_setup(self):
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+
         main_menu = QMenu()
 
         self.disable_suppression_menu.setEnabled(False)
@@ -116,18 +171,39 @@ class CadmusApplication(QSystemTrayIcon):
         self.setContextMenu(main_menu)
 
     def disable_noise_suppression(self):
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+
         CadmusPulseInterface.unload_modules()
         self.disable_suppression_menu.setEnabled(False)
         self.enable_suppression_menu.setEnabled(True)
         self.setIcon(self.disabled_icon)
 
     def enable_noise_suppression(self):
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+
         CadmusPulseInterface.load_modules(self.sender().mic_name, self.cadmus_lib_path)
         self.setIcon(self.enabled_icon)
         self.enable_suppression_menu.setEnabled(False)
         self.disable_suppression_menu.setEnabled(True)
 
     def quit(self):
+        """FIXME! briefly describe function
+
+        :returns:
+        :rtype:
+
+        """
+
         self.disable_noise_suppression()
         self.app_context.app.quit()
 
