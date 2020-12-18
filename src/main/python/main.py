@@ -1,7 +1,12 @@
 import sys
 
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QWidget, QWidgetAction, QSlider
+from PyQt5.QtWidgets import (
+    QSystemTrayIcon,
+    QMenu,
+    QAction,
+    QWidget,
+)
 from PyQt5.QtCore import Qt
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from shutil import copyfile
@@ -40,7 +45,7 @@ class CadmusPulseInterface:
 
         pulse.module_load(
             "module-loopback",
-            "latency_msec=1 source=%s sink=mic_raw_in channels=1" % mic_name,
+            "latency_msec=200 source=%s sink=mic_raw_in channels=1" % mic_name,
         )
 
         pulse.module_load(
@@ -69,9 +74,13 @@ class AudioMenuItem(QAction):
         self.mic_name = mic_name
         self.setStatusTip("Use the %s as an input for noise suppression" % text)
 
+class SuppressionLevelMenuItem(QAction):
+    def __init__(self, suppression_level, parent):
+        super().__init__(f"{suppression_level}", parent)
+        self.suppression_level = suppression_level
 
 class CadmusApplication(QSystemTrayIcon):
-    control_level = 50
+    control_level = 30
 
     def __init__(self, app_context, parent=None):
         QSystemTrayIcon.__init__(self, parent)
@@ -83,22 +92,18 @@ class CadmusApplication(QSystemTrayIcon):
         self.disable_suppression_menu = QAction("Disable Noise Suppression")
         self.enable_suppression_menu = QMenu("Enable Noise Suppression")
         self.level_section = None
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setTickInterval(5)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(100)
-        self.slider.setValue(CadmusApplication.control_level)
-        self.slider.valueChanged.connect(self.slider_valuechange)
+
         self.exit_menu = QAction("Exit")
 
         self.gui_setup()
         self.drop_cadmus_binary()
 
     def get_section_message(self):
-        return "Suppression Level: %d" % self.slider.value()
+        return "Suppression Level: %d" % self.control_level
 
-    def slider_valuechange(self):
-        CadmusApplication.control_level = self.slider.value()
+    def checkbox_value_change(self):
+        print(f"Suppression level set to: {self.sender().suppression_level}")
+        CadmusApplication.control_level = self.sender().suppression_level
         self.level_section.setText(self.get_section_message())
 
     def drop_cadmus_binary(self):
@@ -131,11 +136,22 @@ class CadmusApplication(QSystemTrayIcon):
         main_menu.addAction(self.disable_suppression_menu)
         main_menu.addAction(self.exit_menu)
 
-        # Add slider widget
+        # Menu for Suppression Level
+        self.suppression_level_menu = QMenu("Set Noise Suppression Level")
+        
+        # Create Submenu
         self.level_section = self.enable_suppression_menu.addSection(self.get_section_message())
-        wa = QWidgetAction(self.enable_suppression_menu)
-        wa.setDefaultWidget(self.slider)
-        self.enable_suppression_menu.addAction(wa)
+
+        # Add checkboxes for suppression levels
+        for i in range(0, 101, 10):
+            menu_item = SuppressionLevelMenuItem(i, self.suppression_level_menu)
+            menu_item.setCheckable(True)
+            if (i == self.control_level):
+                menu_item.setChecked(True)
+            self.suppression_level_menu.addAction(menu_item)
+            menu_item.triggered.connect(self.checkbox_value_change)
+        
+        self.enable_suppression_menu.addMenu(self.suppression_level_menu)
 
         self.setIcon(self.disabled_icon)
         self.setContextMenu(main_menu)
