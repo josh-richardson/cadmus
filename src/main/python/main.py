@@ -22,14 +22,16 @@ class CadmusPulseInterface:
                 s.write(c + "\n")
 
     @staticmethod
-    def load_modules(mic_name, cadmus_lib_path):
+    def load_modules(mic_name, mic_rate, cadmus_lib_path):
         print(mic_name)
+        print(mic_rate)
         print(cadmus_lib_path)
 
         pulse.module_load(
             "module-null-sink",
-            "sink_name=mic_denoised_out "
-            "sink_properties=\"device.description='Cadmus Microphone Sink'\"",
+            "sink_name=mic_denoised_out rate=%d "
+            "sink_properties=\"device.description='Cadmus Microphone Sink'\""
+            % mic_rate,
         )
         pulse.module_load(
             "module-ladspa-sink",
@@ -64,9 +66,10 @@ class CadmusPulseInterface:
 
 
 class AudioMenuItem(QAction):
-    def __init__(self, text, parent, mic_name):
+    def __init__(self, text, parent, mic_name, mic_rate):
         super().__init__(text, parent)
         self.mic_name = mic_name
+        self.mic_rate = mic_rate
         self.setStatusTip("Use the %s as an input for noise suppression" % text)
 
 
@@ -120,7 +123,7 @@ class CadmusApplication(QSystemTrayIcon):
 
         for src in pulse.source_list():
             mic_menu_item = AudioMenuItem(
-                src.description, self.enable_suppression_menu, src.name,
+                src.description, self.enable_suppression_menu, src.name, src.sample_spec.rate
             )
             self.enable_suppression_menu.addAction(mic_menu_item)
             mic_menu_item.triggered.connect(self.enable_noise_suppression)
@@ -147,7 +150,7 @@ class CadmusApplication(QSystemTrayIcon):
         self.setIcon(self.disabled_icon)
 
     def enable_noise_suppression(self):
-        CadmusPulseInterface.load_modules(self.sender().mic_name, self.cadmus_lib_path)
+        CadmusPulseInterface.load_modules(self.sender().mic_name, self.sender().mic_rate, self.cadmus_lib_path)
         self.setIcon(self.enabled_icon)
         self.enable_suppression_menu.setEnabled(False)
         self.disable_suppression_menu.setEnabled(True)
