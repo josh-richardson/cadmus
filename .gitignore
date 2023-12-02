@@ -1,3 +1,5 @@
 target
 cadmus.zip
 releases
+venv
+.vscode
