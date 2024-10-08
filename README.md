@@ -4,7 +4,7 @@ Cadmus
 ======================
  [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-**Notice: Cadmus is deprecated. Please use [https://github.com/noisetorch/NoiseTorch](NoiseTorch).**
+**Notice: Cadmus is deprecated. Please use [NoiseTorch](https://github.com/noisetorch/NoiseTorch).**
  
 Cadmus is a graphical application which allows you to remove background noise from audio in real-time in any communication app. Cadmus adds a notification icon to your shell which allows you to easily select a microphone as a source, and subsequently creates a PulseAudio output which removes all recorded background noise (typing, ambient noise, etc). If you find the application useful, leave a :star: — it helps!
 
